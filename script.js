@@ -23,6 +23,20 @@ function loadCategories() {
         .finally(() => hideLoading());
 }
 
+function loadProducts() {
+    showLoading();
+    fetch('https://online-store-backend-vw45.onrender.com/api/products')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Produtos carregados:', data);
+            products = data;
+            renderProducts();
+            renderCategoryNav(); // Certifique-se de que as categorias são renderizadas após os produtos
+        })
+        .catch(error => console.error('Erro ao carregar produtos:', error))
+        .finally(() => hideLoading());
+}
+
 function renderCategoryNav() {
     const categoryNav = document.getElementById('categoryNav');
     if (!categoryNav) {
@@ -55,6 +69,73 @@ function renderCategoryNav() {
     });
 
     window.addEventListener('scroll', highlightActiveCategory);
+}
+
+function renderProducts() {
+    const productsContainer = document.getElementById('products');
+    if (!productsContainer) {
+        console.error('Elemento productsContainer não encontrado no DOM');
+        return;
+    }
+
+    productsContainer.innerHTML = '';
+    const productsByCategory = {};
+    products.forEach(product => {
+        const category = product.category || 'sem-categoria';
+        if (!productsByCategory[category]) {
+            productsByCategory[category] = [];
+        }
+        productsByCategory[category].push(product);
+    });
+
+    Object.keys(productsByCategory).forEach(category => {
+        const categoryDiv = document.createElement('div');
+        categoryDiv.classList.add('category');
+        categoryDiv.id = `category-${category}`;
+        categoryDiv.innerHTML = `<h2>${category.replace('-', ' ')}</h2>`;
+        productsContainer.appendChild(categoryDiv);
+
+        const productGrid = document.createElement('div');
+        productGrid.classList.add('product-grid');
+        categoryDiv.appendChild(productGrid);
+
+        productsByCategory[category].forEach(product => {
+            if (!product._id) {
+                console.error('Produto inválido, sem _id:', product);
+                return;
+            }
+            const productElement = document.createElement('div');
+            productElement.classList.add('product');
+            productElement.innerHTML = `
+                <img src="${product.image}" alt="${product.name}" onclick="openProductModal('${product._id}')">
+                <h3>${product.name}</h3>
+                <p>Preço: R$ ${product.price.toFixed(2)}</p>
+                <button onclick="addToCart('${product._id}')">Adicionar ao Carrinho</button>
+            `;
+            productGrid.appendChild(productElement);
+        });
+    });
+}
+
+function openProductModal(productId) {
+    const product = products.find(p => p._id === productId);
+    if (product) {
+        const productDetails = document.getElementById('productDetails');
+        productDetails.innerHTML = `
+            <img src="${product.image}" alt="${product.name}">
+            <h3>${product.name}</h3>
+            <p>${product.description}</p>
+            <p>Preço: R$ ${product.price.toFixed(2)}</p>
+            <button onclick="addToCart('${product._id}'); closeProductModal()">Adicionar ao Carrinho</button>
+        `;
+        document.getElementById('productModal').style.display = 'block';
+    } else {
+        console.error('Produto não encontrado:', productId);
+    }
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').style.display = 'none';
 }
 
 function highlightActiveCategory() {
@@ -107,6 +188,11 @@ function addToCart(productId) {
 
 function renderCart() {
     const cartContainer = document.getElementById('cart');
+    if (!cartContainer) {
+        console.error('Elemento cartContainer não encontrado no DOM');
+        return;
+    }
+
     cartContainer.innerHTML = '';
     cart.forEach((item, index) => {
         const cartItemElement = document.createElement('div');
@@ -161,7 +247,6 @@ window.onclick = function(event) {
         closeProductModal();
     }
 };
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const cssLink = document.getElementById('css-link');
