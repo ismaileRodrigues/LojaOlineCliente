@@ -9,6 +9,24 @@ let categories = [];
 const cart = [];
 let cachedProductsByCategory = null;
 
+function showLoading() {
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.style.display = 'flex'; // Mostra o loading
+    } else {
+        console.warn('Elemento de loading não encontrado no DOM.');
+    }
+}
+
+function hideLoading() {
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.style.display = 'none'; // Esconde o loading
+    } else {
+        console.warn('Elemento de loading não encontrado no DOM.');
+    }
+}
+
 function loadData() {
     showLoading();
     Promise.all([
@@ -24,6 +42,8 @@ function loadData() {
         .catch(error => console.error('Error loading data:', error))
         .finally(() => hideLoading());
 }
+
+// ... resto do código (renderProducts, etc.)
 
 function getProductsByCategory() {
     if (!cachedProductsByCategory) {
