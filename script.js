@@ -19,7 +19,7 @@ function loadCategories() {
             categories = data;
             renderCategoryNav();
         })
-        .catch(error => console.error('Erro ao carregar categorias:', error))
+        .catch(error => console.error('Error loading categories:', error))
         .finally(() => hideLoading());
 }
 
@@ -31,19 +31,14 @@ function loadProducts() {
             console.log('Produtos carregados:', data);
             products = data;
             renderProducts();
-            renderCategoryNav(); // Certifique-se de que as categorias são renderizadas após os produtos
+            renderCategoryNav();
         })
-        .catch(error => console.error('Erro ao carregar produtos:', error))
+        .catch(error => console.error('Error loading products:', error))
         .finally(() => hideLoading());
 }
 
 function renderCategoryNav() {
     const categoryNav = document.getElementById('categoryNav');
-    if (!categoryNav) {
-        console.error('Elemento categoryNav não encontrado no DOM');
-        return;
-    }
-
     categoryNav.innerHTML = '';
     const productsByCategory = {};
     products.forEach(product => {
@@ -73,12 +68,8 @@ function renderCategoryNav() {
 
 function renderProducts() {
     const productsContainer = document.getElementById('products');
-    if (!productsContainer) {
-        console.error('Elemento productsContainer não encontrado no DOM');
-        return;
-    }
-
     productsContainer.innerHTML = '';
+
     const productsByCategory = {};
     products.forEach(product => {
         const category = product.category || 'sem-categoria';
@@ -188,11 +179,6 @@ function addToCart(productId) {
 
 function renderCart() {
     const cartContainer = document.getElementById('cart');
-    if (!cartContainer) {
-        console.error('Elemento cartContainer não encontrado no DOM');
-        return;
-    }
-
     cartContainer.innerHTML = '';
     cart.forEach((item, index) => {
         const cartItemElement = document.createElement('div');
@@ -224,8 +210,9 @@ function updateCartCount() {
 }
 
 function makeOrder() {
+    const userName = prompt("Por favor, insira o seu nome:");
     const orderSummary = cart.map(item => `${item.name} - R$ ${item.price.toFixed(2)}`).join('\n');
-    const whatsappMessage = `Resumo do Pedido:\n${orderSummary}\nTotal: R$ ${total.toFixed(2)}`;
+    const whatsappMessage = `Nome: ${userName}\nResumo do Pedido:\n${orderSummary}\nTotal: R$ ${total.toFixed(2)}`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=5541997457028&text=${encodeURIComponent(whatsappMessage)}`;
     window.open(whatsappUrl, '_blank');
 }
@@ -247,6 +234,7 @@ window.onclick = function(event) {
     }
 };
 
+// Adicionar timestamp ao link do CSS, do script.js e à URL do index.html para evitar cache
 document.addEventListener('DOMContentLoaded', () => {
     const cssLink = document.getElementById('css-link');
     const scriptLink = document.getElementById('script-link');
@@ -254,10 +242,9 @@ document.addEventListener('DOMContentLoaded', () => {
     cssLink.href = `style.css?t=${timestamp}`;
     scriptLink.src = `script.js?t=${timestamp}`;
 
-    // Forçar recarga completa com hash
-    const currentHash = window.location.hash;
-    const currentTimestamp = currentHash ? parseInt(currentHash.replace('#t=', '')) : null;
-    if (!currentTimestamp || currentTimestamp !== timestamp) {
-        window.location.replace(`${window.location.pathname}#t=${timestamp}`);
+    // Adicionar timestamp à URL do index.html
+    if (!window.location.search.includes('t=')) {
+        const newUrl = `${window.location.pathname}?t=${timestamp}`;
+        window.history.replaceState(null, '', newUrl);
     }
 });
