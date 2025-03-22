@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
+    
     <nav class="top-nav">
         <div class="nav-content">
             <a href="https://site-oficial-xi.vercel.app/" class="home-button">
@@ -19,7 +20,9 @@
 
     <div class="container">
         <h1>Loja Online</h1>
-        <div id="loading" class="loading">Loading...</div>
+       <div id="loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); color: white; text-align: center; padding-top: 20%; z-index: 9999;">
+    Carregando...
+</div>
         <div id="categoryNav" class="category-nav"></div>
         <div class="products" id="products"></div>
     </div>
