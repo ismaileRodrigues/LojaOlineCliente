@@ -46,6 +46,8 @@ function loadProducts(page = 1) {
                 products = data;
                 localStorage.setItem(`products_page_${page}`, JSON.stringify(products));
                 renderProducts();
+                renderCategoryNav();
+
             })
             .catch(error => console.error('Error loading products:', error));
     }
