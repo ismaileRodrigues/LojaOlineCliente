@@ -4,25 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loja Online</title>
-<link id="css-link" rel="stylesheet" href="style.css">
+    <link id="css-link" rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <nav class="top-nav">
-        <div class="nav-content">
-            <a href="https://site-oficial-xi.vercel.app/" class="home-button">
-                <i class="fas fa-home"></i> Home
-            </a>
-            <div class="cart-icon" onclick="openCartModal()"> 🛒 <span id="cartCount">0</span> </div>
-        </div>
-    </nav>
+    <header>
+        <nav class="top-nav">
+            <div class="nav-content">
+                <a href="https://site-oficial-xi.vercel.app/" class="home-button">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <div class="cart-icon" onclick="openCartModal()"> 🛒 <span id="cartCount">0</span> </div>
+            </div>
+        </nav>
+    </header>
 
-    <div class="container">
+    <main class="container">
         <h1>Loja Online</h1>
         <div id="loading" class="loading">Loading...</div>
-        <div id="categoryNav" class="category-nav"></div>
-        <div class="products" id="products"></div>
-    </div>
+        <nav id="categoryNav" class="category-nav"></nav>
+        <section class="products" id="products"></section>
+    </main>
 
     <!-- Modal do Carrinho -->
     <div id="cartModal" class="modal">
@@ -42,7 +44,8 @@
             <div id="productDetails"></div>
         </div>
     </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.0/lazysizes.min.js" async=""></script>
- <script id="script-link" src="script.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.0/lazysizes.min.js" async=""></script>
+    <script id="script-link" src="script.js"></script>
 </body>
 </html>
