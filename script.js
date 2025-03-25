@@ -41,6 +41,7 @@ function loadCategories() {
                 renderCategoryNav();
             })
             .catch(error => console.error('Error loading categories:', error));
+         hideLoading();
     }
 }
 
