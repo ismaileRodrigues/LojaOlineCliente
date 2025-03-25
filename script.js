@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     showLoading();
-    Promise.all([loadCategories(), loadProducts()])
+    loadCategories()
+        .then(() => loadProducts())
         .then(() => {
             updateTotal();
             updateCartCount();
@@ -103,6 +104,8 @@ function renderProducts() {
         }
         productsByCategory[category].push(product);
     });
+
+    console.log('Produtos por categoria:', productsByCategory);
 
     Object.keys(productsByCategory).forEach(category => {
         const categoryDiv = document.createElement('div');
