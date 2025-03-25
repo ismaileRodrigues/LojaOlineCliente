@@ -1,40 +1,54 @@
 document.addEventListener('DOMContentLoaded', () => {
-    loadCategories();
-    loadProducts();
-    updateTotal();
-    updateCartCount();
+    showLoading();
+    Promise.all([loadCategories(), loadProducts()])
+        .then(() => {
+            updateTotal();
+            updateCartCount();
+        })
+        .finally(() => hideLoading());
 });
 
 let products = [];
 let categories = [];
 const cart = [];
 let total = 0;
+let currentPage = 1;
+const productsPerPage = 20;
 
 function loadCategories() {
-    showLoading();
-    fetch('https://online-store-backend-vw45.onrender.com/api/categories')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Categorias carregadas:', data);
-            categories = data;
-            renderCategoryNav();
-        })
-        .catch(error => console.error('Error loading categories:', error))
-        .finally(() => hideLoading());
+    const cachedCategories = localStorage.getItem('categories');
+    if (cachedCategories) {
+        categories = JSON.parse(cachedCategories);
+        renderCategoryNav();
+    } else {
+        return fetch('https://online-store-backend-vw45.onrender.com/api/categories')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Categorias carregadas:', data);
+                categories = data;
+                localStorage.setItem('categories', JSON.stringify(categories));
+                renderCategoryNav();
+            })
+            .catch(error => console.error('Error loading categories:', error));
+    }
 }
 
-function loadProducts() {
-    showLoading();
-    fetch('https://online-store-backend-vw45.onrender.com/api/products')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Produtos carregados:', data);
-            products = data;
-            renderProducts();
-            renderCategoryNav();
-        })
-        .catch(error => console.error('Error loading products:', error))
-        .finally(() => hideLoading());
+function loadProducts(page = 1) {
+    const cachedProducts = localStorage.getItem(`products_page_${page}`);
+    if (cachedProducts) {
+        products = JSON.parse(cachedProducts);
+        renderProducts();
+    } else {
+        return fetch(`https://online-store-backend-vw45.onrender.com/api/products?page=${page}&limit=${productsPerPage}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Produtos carregados:', data);
+                products = data;
+                localStorage.setItem(`products_page_${page}`, JSON.stringify(products));
+                renderProducts();
+            })
+            .catch(error => console.error('Error loading products:', error));
+    }
 }
 
 function renderCategoryNav() {
@@ -106,6 +120,14 @@ function renderProducts() {
             productGrid.appendChild(productElement);
         });
     });
+
+    // Add pagination controls
+    const paginationControls = document.createElement('div');
+    paginationControls.innerHTML = `
+        <button onclick="loadProducts(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
+        <button onclick="loadProducts(${currentPage + 1})">Next</button>
+    `;
+    productsContainer.appendChild(paginationControls);
 }
 
 function openProductModal(productId) {
@@ -210,7 +232,6 @@ function updateCartCount() {
 }
 
 function makeOrder() {
-    //const userName = prompt("Por favor, insira seu nome:");
     const orderSummary = cart.map(item => `${item.name} - R$ ${item.price.toFixed(2)}`).join('\n');
     const whatsappMessage = `\nResumo do Pedido:\n${orderSummary}\nTotal: R$ ${total.toFixed(2)}`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=5541997457028&text=${encodeURIComponent(whatsappMessage)}`;
