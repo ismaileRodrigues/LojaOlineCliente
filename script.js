@@ -21,7 +21,7 @@ function loadCategories() {
         categories = JSON.parse(cachedCategories);
         console.log('Categorias carregadas do cache:', categories);
         renderCategoryNav();
-        return Promise.resolve(); // Adicione esta linha
+        return Promise.resolve();
     } else {
         return fetch('https://online-store-backend-vw45.onrender.com/api/categories')
             .then(response => response.json())
@@ -41,7 +41,7 @@ function loadProducts(page = 1) {
         products = JSON.parse(cachedProducts);
         console.log('Produtos carregados do cache:', products);
         renderProducts();
-        return Promise.resolve(); // Adicione esta linha
+        return Promise.resolve();
     } else {
         return fetch(`https://online-store-backend-vw45.onrender.com/api/products?page=${page}&limit=${productsPerPage}`)
             .then(response => response.json())
