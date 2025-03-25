@@ -19,13 +19,14 @@ function loadCategories() {
     const cachedCategories = localStorage.getItem('categories');
     if (cachedCategories) {
         categories = JSON.parse(cachedCategories);
+        console.log('Categorias carregadas do cache:', categories);
         renderCategoryNav();
         return Promise.resolve(); // Adicione esta linha
     } else {
         return fetch('https://online-store-backend-vw45.onrender.com/api/categories')
             .then(response => response.json())
             .then(data => {
-                console.log('Categorias carregadas:', data);
+                console.log('Categorias carregadas da API:', data);
                 categories = data;
                 localStorage.setItem('categories', JSON.stringify(categories));
                 renderCategoryNav();
@@ -38,13 +39,14 @@ function loadProducts(page = 1) {
     const cachedProducts = localStorage.getItem(`products_page_${page}`);
     if (cachedProducts) {
         products = JSON.parse(cachedProducts);
+        console.log('Produtos carregados do cache:', products);
         renderProducts();
         return Promise.resolve(); // Adicione esta linha
     } else {
         return fetch(`https://online-store-backend-vw45.onrender.com/api/products?page=${page}&limit=${productsPerPage}`)
             .then(response => response.json())
             .then(data => {
-                console.log('Produtos carregados:', data);
+                console.log('Produtos carregados da API:', data);
                 products = data;
                 localStorage.setItem(`products_page_${page}`, JSON.stringify(products));
                 renderProducts();
@@ -56,6 +58,10 @@ function loadProducts(page = 1) {
 
 function renderCategoryNav() {
     const categoryNav = document.getElementById('categoryNav');
+    if (!categoryNav) {
+        console.error('Elemento #categoryNav não encontrado no DOM');
+        return;
+    }
     categoryNav.innerHTML = '';
     const productsByCategory = {};
     products.forEach(product => {
@@ -65,6 +71,8 @@ function renderCategoryNav() {
         }
         productsByCategory[category].push(product);
     });
+
+    console.log('Produtos por categoria:', productsByCategory);
 
     Object.keys(productsByCategory).forEach(category => {
         const categoryLink = document.createElement('span');
