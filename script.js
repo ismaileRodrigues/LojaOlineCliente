@@ -86,8 +86,11 @@ function renderCategoryNav() {
                 categorySection.scrollIntoView({ behavior: 'smooth' });
             }
         });
+        console.log('Adicionando categoria ao DOM:', categoryLink.outerHTML); // Log adicional
         categoryNav.appendChild(categoryLink);
     });
+
+    console.log('Elementos adicionados ao categoryNav:', categoryNav.innerHTML); // Log adicional
 
     window.addEventListener('scroll', highlightActiveCategory);
 }
