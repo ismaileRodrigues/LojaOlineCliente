@@ -20,6 +20,7 @@ function loadCategories() {
     if (cachedCategories) {
         categories = JSON.parse(cachedCategories);
         renderCategoryNav();
+        return Promise.resolve(); // Adicione esta linha
     } else {
         return fetch('https://online-store-backend-vw45.onrender.com/api/categories')
             .then(response => response.json())
@@ -38,6 +39,7 @@ function loadProducts(page = 1) {
     if (cachedProducts) {
         products = JSON.parse(cachedProducts);
         renderProducts();
+        return Promise.resolve(); // Adicione esta linha
     } else {
         return fetch(`https://online-store-backend-vw45.onrender.com/api/products?page=${page}&limit=${productsPerPage}`)
             .then(response => response.json())
@@ -47,7 +49,6 @@ function loadProducts(page = 1) {
                 localStorage.setItem(`products_page_${page}`, JSON.stringify(products));
                 renderProducts();
                 renderCategoryNav();
-
             })
             .catch(error => console.error('Error loading products:', error));
     }
