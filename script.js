@@ -54,22 +54,13 @@ function loadProducts(page = 1) {
 function renderCategoryNav() {
     const categoryNav = document.getElementById('categoryNav');
     categoryNav.innerHTML = '';
-    const productsByCategory = {};
-    products.forEach(product => {
-        const category = product.category || 'sem-categoria';
-        if (!productsByCategory[category]) {
-            productsByCategory[category] = [];
-        }
-        productsByCategory[category].push(product);
-    });
-
-    Object.keys(productsByCategory).forEach(category => {
+    categories.forEach(category => {
         const categoryLink = document.createElement('span');
         categoryLink.classList.add('category-link');
-        categoryLink.setAttribute('data-category', category);
-        categoryLink.textContent = category.replace('-', ' ');
+        categoryLink.setAttribute('data-category', category.name);
+        categoryLink.textContent = category.name.replace('-', ' ');
         categoryLink.addEventListener('click', () => {
-            const categorySection = document.getElementById(`category-${category}`);
+            const categorySection = document.getElementById(`category-${category.name}`);
             if (categorySection) {
                 categorySection.scrollIntoView({ behavior: 'smooth' });
             }
