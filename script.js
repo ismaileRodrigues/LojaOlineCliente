@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.status === 'closed') {
             document.body.innerHTML = '<h1>Loja Fechada</h1>';
         } else {
+               showLoading();
             loadCategories();
             loadProducts();
             updateTotal();
