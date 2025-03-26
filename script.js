@@ -1,3 +1,17 @@
+function showLoading() {
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.style.display = 'flex';
+    }
+}
+
+function hideLoading() {
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.style.display = 'none';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch('https://online-store-backend-vw45.onrender.com/api/store-status');
@@ -11,14 +25,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             await loadProducts();
             updateTotal();
             updateCartCount();
-            hideLoading(); // Adicione esta linha aqui
+            hideLoading();
         }
     } catch (error) {
         console.error('Erro ao verificar o estado da loja:', error);
-        hideLoading(); // Adicione esta linha aqui para garantir que o loading seja escondido em caso de erro
+        hideLoading();
     }
 });
-
 function loadCategories() {
     const cachedCategories = localStorage.getItem('categories');
     if (cachedCategories) {
