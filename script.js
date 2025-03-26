@@ -1,12 +1,22 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     showLoading();
-    loadCategories()
-        .then(() => loadProducts())
-        .then(() => {
+    try {
+        const response = await fetch('https://online-store-backend-vw45.onrender.com/api/store-status');
+        const data = await response.json();
+
+        if (data.status === 'closed') {
+            document.body.innerHTML = '<h1>Loja Fechada</h1>';
+        } else {
+            await loadCategories();
+            await loadProducts();
             updateTotal();
             updateCartCount();
-        })
-        .finally(() => hideLoading());
+        }
+    } catch (error) {
+        console.error('Erro ao verificar o estado da loja:', error);
+    } finally {
+        hideLoading();
+    }
 });
 
 let products = [];
