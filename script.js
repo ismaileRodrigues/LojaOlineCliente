@@ -12,6 +12,44 @@ function hideLoading() {
     }
 }
 
+function renderCategoryNav() {
+    const categoryNav = document.getElementById('categoryNav');
+    if (!categoryNav) {
+        console.error('Elemento #categoryNav não encontrado no DOM');
+        return;
+    }
+    categoryNav.innerHTML = '';
+    const productsByCategory = {};
+    products.forEach(product => {
+        const category = product.category || 'sem-categoria';
+        if (!productsByCategory[category]) {
+            productsByCategory[category] = [];
+        }
+        productsByCategory[category].push(product);
+    });
+
+    console.log('Produtos por categoria:', productsByCategory);
+
+    Object.keys(productsByCategory).forEach(category => {
+        const categoryLink = document.createElement('span');
+        categoryLink.classList.add('category-link');
+        categoryLink.setAttribute('data-category', category);
+        categoryLink.textContent = category.replace('-', ' ');
+        categoryLink.addEventListener('click', () => {
+            const categorySection = document.getElementById(`category-${category}`);
+            if (categorySection) {
+                categorySection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+        console.log('Adicionando categoria ao DOM:', categoryLink.outerHTML); // Log adicional
+        categoryNav.appendChild(categoryLink);
+    });
+
+    console.log('Elementos adicionados ao categoryNav:', categoryNav.innerHTML); // Log adicional
+
+    window.addEventListener('scroll', highlightActiveCategory);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch('https://online-store-backend-vw45.onrender.com/api/store-status');
@@ -32,13 +70,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideLoading();
     }
 });
+
 function loadCategories() {
     const cachedCategories = localStorage.getItem('categories');
     if (cachedCategories) {
         categories = JSON.parse(cachedCategories);
         console.log('Categorias carregadas do cache:', categories);
         renderCategoryNav();
-        hideLoading(); // Adicione esta linha aqui
+        hideLoading();
         return Promise.resolve();
     } else {
         return fetch('https://online-store-backend-vw45.onrender.com/api/categories')
@@ -52,7 +91,7 @@ function loadCategories() {
             })
             .catch(error => {
                 console.error('Error loading categories:', error);
-                hideLoading(); // Adicione esta linha aqui para garantir que o loading seja escondido em caso de erro
+                hideLoading();
             });
     }
 }
@@ -63,7 +102,7 @@ function loadProducts(page = 1) {
         products = JSON.parse(cachedProducts);
         console.log('Produtos carregados do cache:', products);
         renderProducts();
-        hideLoading(); // Adicione esta linha aqui
+        hideLoading();
         return Promise.resolve();
     } else {
         return fetch(`https://online-store-backend-vw45.onrender.com/api/products?page=${page}&limit=${productsPerPage}`)
@@ -74,11 +113,11 @@ function loadProducts(page = 1) {
                 localStorage.setItem(`products_page_${page}`, JSON.stringify(products));
                 renderProducts();
                 renderCategoryNav();
-                hideLoading(); // Adicione esta linha aqui
+                hideLoading();
             })
             .catch(error => {
                 console.error('Error loading products:', error);
-                hideLoading(); // Adicione esta linha aqui para garantir que o loading seja escondido em caso de erro
+                hideLoading();
             });
     }
 }
