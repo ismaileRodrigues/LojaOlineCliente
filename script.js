@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await response.json();
 
         if (data.status === 'closed') {
-            document.body.innerHTML = '<h1>Loja Fechada</h1>';
-              document.body.innerHTML = '<p>Fale conosco Whatsapp: 41-998642005</p>';
+            document.body.innerHTML = '<h1>Loja Fechada</h1> <br> <p>Fale conosco Whatsapp: 41-998642005</p>';
+            
         } else {
             await loadCategories();
             await loadProducts();
