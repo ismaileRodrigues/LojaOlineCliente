@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (data.status === 'closed') {
             document.body.innerHTML = '<h1>Loja Fechada</h1>';
+              document.body.innerHTML = '<p>Fale conosco Whatsapp: 41-998642005</p>';
         } else {
             await loadCategories();
             await loadProducts();
