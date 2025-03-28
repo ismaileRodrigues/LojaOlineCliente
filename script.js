@@ -6,10 +6,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (data.status === 'closed') {
             document.body.innerHTML = '<h1>Loja Fechada</h1> <br> <p>Fale conosco Whatsapp: 41-998642005</p>';
-            
         } else {
-            await loadCategories();
-            await loadProducts();
+            await Promise.all([loadCategories(), loadProducts()]);
+            renderCategoryNav(); // Chamada após os dados serem carregados
+            renderProducts();
             updateTotal();
             updateCartCount();
         }
@@ -27,44 +27,47 @@ let total = 0;
 let currentPage = 1;
 const productsPerPage = 20;
 
-function loadCategories() {
+async function loadCategories() {
     const cachedCategories = localStorage.getItem('categories');
-    if (cachedCategories) {
+    const cacheTime = localStorage.getItem('categoriesTimestamp');
+    const now = Date.now();
+
+    if (cachedCategories && cacheTime && (now - cacheTime < 3600000)) { // Cache válido por 1 hora
         categories = JSON.parse(cachedCategories);
         console.log('Categorias carregadas do cache:', categories);
-        renderCategoryNav();
-        return Promise.resolve();
-    } else {
-        return fetch('https://online-store-backend-vw45.onrender.com/api/categories')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Categorias carregadas da API:', data);
-                categories = data;
-                localStorage.setItem('categories', JSON.stringify(categories));
-                renderCategoryNav();
-            })
-            .catch(error => console.error('Error loading categories:', error));
+        return;
+    }
+    try {
+        const response = await fetch('https://online-store-backend-vw45.onrender.com/api/categories');
+        const data = await response.json();
+        categories = data;
+        localStorage.setItem('categories', JSON.stringify(categories));
+        localStorage.setItem('categoriesTimestamp', now);
+        console.log('Categorias carregadas da API:', categories);
+    } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
     }
 }
 
-function loadProducts(page = 1) {
+async function loadProducts(page = 1) {
     const cachedProducts = localStorage.getItem(`products_page_${page}`);
-    if (cachedProducts) {
+    const cacheTime = localStorage.getItem(`productsTimestamp_page_${page}`);
+    const now = Date.now();
+
+    if (cachedProducts && cacheTime && (now - cacheTime < 3600000)) { // Cache válido por 1 hora
         products = JSON.parse(cachedProducts);
         console.log('Produtos carregados do cache:', products);
-        renderProducts();
-        return Promise.resolve();
-    } else {
-        return fetch(`https://online-store-backend-vw45.onrender.com/api/products?page=${page}&limit=${productsPerPage}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log('Produtos carregados da API:', data);
-                products = data;
-                localStorage.setItem(`products_page_${page}`, JSON.stringify(products));
-                renderProducts();
-                renderCategoryNav();
-            })
-            .catch(error => console.error('Error loading products:', error));
+        return;
+    }
+    try {
+        const response = await fetch(`https://online-store-backend-vw45.onrender.com/api/products?page=${page}&limit=${productsPerPage}`);
+        const data = await response.json();
+        products = data;
+        localStorage.setItem(`products_page_${page}`, JSON.stringify(products));
+        localStorage.setItem(`productsTimestamp_page_${page}`, now);
+        console.log('Produtos carregados da API:', products);
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
     }
 }
 
@@ -76,7 +79,19 @@ function renderCategoryNav() {
     }
     categoryNav.innerHTML = '';
     const productsByCategory = {};
+
+    console.log('Produtos disponíveis para renderCategoryNav:', products);
+    if (!products || products.length === 0) {
+        console.warn('Nenhum produto disponível para criar categorias');
+        categoryNav.innerHTML = '<span>Sem categorias disponíveis</span>';
+        return;
+    }
+
     products.forEach(product => {
+        if (!product || !product.category) {
+            console.warn('Produto inválido encontrado:', product);
+            return;
+        }
         const category = product.category || 'sem-categoria';
         if (!productsByCategory[category]) {
             productsByCategory[category] = [];
@@ -84,8 +99,7 @@ function renderCategoryNav() {
         productsByCategory[category].push(product);
     });
 
-    console.log('Produtos por categoria:', productsByCategory);
-
+    console.log('Categorias agrupadas:', productsByCategory);
     Object.keys(productsByCategory).forEach(category => {
         const categoryLink = document.createElement('span');
         categoryLink.classList.add('category-link');
@@ -97,29 +111,38 @@ function renderCategoryNav() {
                 categorySection.scrollIntoView({ behavior: 'smooth' });
             }
         });
-        console.log('Adicionando categoria ao DOM:', categoryLink); // Log adicional
         categoryNav.appendChild(categoryLink);
     });
-
-    console.log('Elementos adicionados ao categoryNav:', categoryNav.innerHTML); // Log adicional
 
     window.addEventListener('scroll', highlightActiveCategory);
 }
 
 function renderProducts() {
     const productsContainer = document.getElementById('products');
+    if (!productsContainer) {
+        console.error('Elemento #products não encontrado no DOM');
+        return;
+    }
     productsContainer.innerHTML = '';
 
     const productsByCategory = {};
+    if (!products || products.length === 0) {
+        console.warn('Nenhum produto disponível para renderizar');
+        productsContainer.innerHTML = '<p>Nenhum produto disponível</p>';
+        return;
+    }
+
     products.forEach(product => {
+        if (!product || !product._id) {
+            console.warn('Produto inválido encontrado:', product);
+            return;
+        }
         const category = product.category || 'sem-categoria';
         if (!productsByCategory[category]) {
             productsByCategory[category] = [];
         }
         productsByCategory[category].push(product);
     });
-
-    console.log('Produtos por categoria:', productsByCategory);
 
     Object.keys(productsByCategory).forEach(category => {
         const categoryDiv = document.createElement('div');
@@ -133,10 +156,6 @@ function renderProducts() {
         categoryDiv.appendChild(productGrid);
 
         productsByCategory[category].forEach(product => {
-            if (!product._id) {
-                console.error('Produto inválido, sem _id:', product);
-                return;
-            }
             const productElement = document.createElement('div');
             productElement.classList.add('product');
             productElement.innerHTML = `
@@ -149,7 +168,6 @@ function renderProducts() {
         });
     });
 
-    // Add pagination controls
     const paginationControls = document.createElement('div');
     paginationControls.innerHTML = `
         <button onclick="loadProducts(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
@@ -165,7 +183,7 @@ function openProductModal(productId) {
         productDetails.innerHTML = `
             <img src="${product.image}" alt="${product.name}">
             <h3>${product.name}</h3>
-            <p>${product.description}</p>
+            <p>${product.description || 'Sem descrição disponível'}</p>
             <p>Preço: R$ ${product.price.toFixed(2)}</p>
             <button onclick="addToCart('${product._id}'); closeProductModal()">Adicionar ao Carrinho</button>
         `;
@@ -201,23 +219,18 @@ function highlightActiveCategory() {
 
 function showLoading() {
     const loadingElement = document.getElementById('loading');
-    if (loadingElement) {
-        loadingElement.style.display = 'flex';
-    }
+    if (loadingElement) loadingElement.style.display = 'flex';
 }
 
 function hideLoading() {
     const loadingElement = document.getElementById('loading');
-    if (loadingElement) {
-        loadingElement.style.display = 'none';
-    }
+    if (loadingElement) loadingElement.style.display = 'none';
 }
 
 function addToCart(productId) {
     const product = products.find(p => p._id === productId);
     if (product) {
         cart.push(product);
-        console.log('Produto adicionado ao carrinho:', product);
         renderCart();
         updateTotal();
         updateCartCount();
@@ -260,7 +273,7 @@ function updateCartCount() {
 }
 
 function makeOrder() {
-    const orderSummary = cart.map(item => `${item.name} - R$ ${item.price.toFixed(2)}`).join('\n');
+    const orderSummary = cart.map(item34 => `${item.name} - R$ ${item.price.toFixed(2)}`).join('\n');
     const whatsappMessage = `\nResumo do Pedido:\n${orderSummary}\nTotal: R$ ${total.toFixed(2)}`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=5541997457028&text=${encodeURIComponent(whatsappMessage)}`;
     window.open(whatsappUrl, '_blank');
@@ -282,18 +295,3 @@ window.onclick = function(event) {
         closeProductModal();
     }
 };
-
-// Adicionar timestamp ao link do CSS, do script.js e à URL do index.html para evitar cache
-document.addEventListener('DOMContentLoaded', () => {
-    const cssLink = document.getElementById('css-link');
-    const scriptLink = document.getElementById('script-link');
-    const timestamp = new Date().getTime();
-    cssLink.href = `style.css?t=${timestamp}`;
-    scriptLink.src = `script.js?t=${timestamp}`;
-
-    // Adicionar timestamp à URL do index.html
-    if (!window.location.search.includes('t=')) {
-        const newUrl = `${window.location.pathname}?t=${timestamp}`;
-        window.history.replaceState(null, '', newUrl);
-    }
-});
