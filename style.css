@@ -31,8 +31,8 @@ h1,p {
     font-size: 2em;
     color: #ea1d2c;
 }
-i {
-color:green;
+a i {
+color:#25D366;
 }
 @media (max-width: 768px) {
     h1 {
