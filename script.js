@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await response.json();
 
         if (data.status === 'closed') {
-            document.body.innerHTML = '<h1>Loja Fechada</h1> <br> <p>Fale conosco  <a href="https://api.whatsapp.com/send?phone=5541998642005" target="_blank" class="text-white mx-2"><i class="fab fa-whatsapp fa-2x"></i></a></p>';
+            document.body.innerHTML = '<h1>Loja Fechada</h1> <br> <p>Fale conosco:  <a href="https://api.whatsapp.com/send?phone=5541998642005" target="_blank" class="text-white mx-2"><i class="fab fa-whatsapp fa-2x"></i></a></p>';
         } else {
             await Promise.all([loadCategories(), loadProducts()]);
             renderCategoryNav(); // Chamada após os dados serem carregados
