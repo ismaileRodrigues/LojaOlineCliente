@@ -273,7 +273,7 @@ function updateCartCount() {
 }
 
 function makeOrder() {
-    const orderSummary = cart.map(item34 => `${item.name} - R$ ${item.price.toFixed(2)}`).join('\n');
+    const orderSummary = cart.map(item => `${item.name} - R$ ${item.price.toFixed(2)}`).join('\n');
     const whatsappMessage = `\nResumo do Pedido:\n${orderSummary}\nTotal: R$ ${total.toFixed(2)}`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=5541997457028&text=${encodeURIComponent(whatsappMessage)}`;
     window.open(whatsappUrl, '_blank');
